@@ -13,13 +13,13 @@
 <h1>Search</h1>
 <br />
 <div>
-    <input type="button" style="width:250px" value="Search Asset/Machine :" @onclick="SearchAsset" />
+    <input type="button" style="width:180px" value="Search Asset/Machine:" @onclick="SearchAsset" />
     <input type="text" style="width:200px" @bind-value="@strSearchVal" />
 </div>
 <div>
     <br />
     <br />
-    <input type="button" style="width:250px" value="Get Latest Machine" @onclick="ShowLatestMachine" />
+    <input type="button" style="width:180px" value="Get Latest Machine" @onclick="ShowLatestMachine" />
 </div>
 <br />
 
@@ -51,6 +51,7 @@
     private async Task? SearchAsset()
     {
         HttpClient httpClient = new HttpClient();
+        outTable.Clear();
         try
         {
             if (!string.IsNullOrEmpty(strSearchVal))

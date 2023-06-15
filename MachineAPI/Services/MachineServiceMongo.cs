@@ -1,5 +1,6 @@
 ﻿using MachineAPI.Entities;
 using MachineAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -143,8 +144,6 @@ namespace MachineAPI.Services
 
         public override List<MapBsonToMachineModel>? GetLatestMachine()
         {
-            //DataTable? dataFromDB = new();
-            //DataTable? outSearchData = new();
             int latestCountCheck = 0;
             string[] machineNames, assetNames;
             var client = new MongoClient(Constants.ConnectionString);

@@ -1,8 +1,5 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MachineAPI.Services;
-using MongoDB.Bson.IO;
 using MachineAPI.Models;
 
 namespace MachineAPI.Controllers
