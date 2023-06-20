@@ -1,17 +1,15 @@
 ﻿using MachineAPI.Entities;
 using MachineAPI.Models;
-using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System.Data;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace MachineAPI.Services
 {
-    public class MachineServiceMongo : IMachinetService
+    public class AssetsServiceMongo : IAssetsService
     {
         public override bool AddAssetOrMachine(MachineModel machineDetails)
         {
@@ -22,10 +20,10 @@ namespace MachineAPI.Services
                     var client = new MongoClient(Constants.ConnectionString);
                     var db = client.GetDatabase(Constants.DbName);
                     var collectionData = db.GetCollection<BsonDocument>(Constants.MachineCollectionName);
-                    BsonDocument documnt = new BsonDocument
+                    BsonDocument documnt = new() 
                 {
                     { Constants.ColumnNameMachine, machineDetails.MachineName},
-                    { Constants.ColumnNameAsset, machineDetails.Assets[0].AssetName},
+                    { Constants.ColumnNameAsset, machineDetails.Assets[0].Name},
                     { Constants.ColumnNameSeriesNo , machineDetails.Assets[0].SeriesNo}
                 };
                     collectionData.InsertOneAsync(documnt);
@@ -65,7 +63,7 @@ namespace MachineAPI.Services
             }
         }
 
-        public override List<MapBsonToMachineModel>? SearchDocument(string searchString)
+        public override IEnumerable<MachineModel?> Search(string searchString)
         {
             try
             {
@@ -79,8 +77,6 @@ namespace MachineAPI.Services
                 var documents = machinecollectionData.Find(filter).ToList();
                 if (documents.Count == 0)
                 {
-                    queryExp = new BsonRegularExpression(new Regex(searchString, RegexOptions.IgnoreCase));
-                    builder = Builders<BsonDocument>.Filter;
                     filter = builder.Regex(Constants.ColumnNameAsset, queryExp);
                     documents = machinecollectionData.Find(filter).ToList();
                 }
@@ -91,26 +87,37 @@ namespace MachineAPI.Services
                     {
                         listOfMachines.Add(BsonSerializer.Deserialize<MapBsonToMachineModel>(item));
                     }
-                    if (listOfMachines != null)
+                    IEnumerable<MachineModel> listWithGrouping = from p in listOfMachines
+                                                                 group p by p.MachineName into sl
+                                                                 select new MachineModel()
+                                                                 {
+                                                                     MachineName = sl.Key,
+                                                                     Assets = sl.Select(x => new AssetModel
+                                                                     {
+                                                                         Name = x.AssetName,
+                                                                         SeriesNo = x.SeriesNo
+                                                                     }).ToList()
+                                                                 };
+                    if (listWithGrouping != null)
                     {
-                        return listOfMachines;
+                        return listWithGrouping;
                     }
                     else
                     {
-                        return null;
+                        return Enumerable.Empty<MachineModel>();
                     }
                 }
                 else
-                { return null; }
+                { return Enumerable.Empty<MachineModel>(); }
 
             }
             catch
             {
-                return null;
+                return Enumerable.Empty<MachineModel>();
             }
         }
 
-        public override List<MapBsonToMachineModel>? SearchAllDocument()
+        public override IEnumerable<MachineModel> SearchAll()
         {
             try
             {
@@ -125,24 +132,33 @@ namespace MachineAPI.Services
                     {
                         listOfMachines.Add(BsonSerializer.Deserialize<MapBsonToMachineModel>(item));
                     }
-                    if (listOfMachines != null)
+                    IEnumerable<MachineModel> listWithGrouping = from p in listOfMachines
+                                                  group p by p.MachineName into sl
+                                             select new MachineModel()
+                                             {
+                                                 MachineName = sl.Key,
+                                                 Assets = sl.Select(x => new AssetModel
+                                                 {
+                                                     Name = x.AssetName,
+                                                     SeriesNo = x.SeriesNo
+                                                 }).ToList()
+                                             };
+                    if (listWithGrouping != null)
                     {
-                        return listOfMachines;
+                        return listWithGrouping;
                     }
-                    else { return null; }
+                    else { return Enumerable.Empty<MachineModel>(); }
                 }
                 else
-                {
-                    return null;
-                }
+                    return Enumerable.Empty<MachineModel>();
             }
             catch
             {
-                return null;
+                return Enumerable.Empty<MachineModel>();
             }
         }
 
-        public override List<MapBsonToMachineModel>? GetLatestMachine()
+        public override IEnumerable<MachineModel> GetLatestMachine()
         {
             int latestCountCheck = 0;
             string[] machineNames, assetNames;
@@ -186,10 +202,26 @@ namespace MachineAPI.Services
                         }
                     }
                 }
-                return listOfMachines;
+                IEnumerable<MachineModel> listWithGrouping = from p in listOfMachines
+                                                             group p by p.MachineName into sl
+                                                             select new MachineModel()
+                                                             {
+                                                                 MachineName = sl.Key,
+                                                                 Assets = sl.Select(x => new AssetModel
+                                                                 {
+                                                                     Name = x.AssetName,
+                                                                     SeriesNo = x.SeriesNo
+                                                                 }).ToList()
+                                                             };
+                return listWithGrouping;
             }
             else
-                return null;
+                return Enumerable.Empty<MachineModel>();
+        }
+
+        private void UpdateUrl()
+        {
+
         }
     }
 }

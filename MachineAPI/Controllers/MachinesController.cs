@@ -8,10 +8,10 @@ namespace MachineAPI.Controllers
     [ApiController]
     public class MachinesController : ControllerBase
     {
-        private readonly IMachinetService _machineAndAssetService;
-        public MachinesController(IMachinetService machineAndAssetService)
+        private readonly IAssetsService _assetService;
+        public MachinesController(IAssetsService assetService)
         {
-            _machineAndAssetService = machineAndAssetService;
+            _assetService = assetService;
         }
 
         [HttpGet]
@@ -19,18 +19,16 @@ namespace MachineAPI.Controllers
         {
             try
             {
-                List<MapBsonToMachineModel>? documents = null;
-                if(search != null)  
+                if (search != null)
                 {
-                    documents = _machineAndAssetService.SearchDocument(search);
+                    var documents = _assetService.Search(search);
+                    return Ok(documents);
                 }
                 else
-                    documents = _machineAndAssetService.SearchAllDocument();
-
-                if (documents != null)
+                {
+                    var documents = _assetService.SearchAll();
                     return Ok(documents);
-                else
-                    return NotFound();
+                }
             }
             catch
             {
@@ -45,7 +43,7 @@ namespace MachineAPI.Controllers
             {
                 if (machine.MachineName != null && machine.Assets.Count > 0)
                 {
-                    bool ifCreated = _machineAndAssetService.AddAssetOrMachine(machine);
+                    bool ifCreated = _assetService.AddAssetOrMachine(machine);
                     if (ifCreated)
                         return Ok();
                     else
@@ -68,7 +66,7 @@ namespace MachineAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(machine) && !string.IsNullOrEmpty(asset))
                 {
-                    var deletedDoc = await _machineAndAssetService.RemoveAssetFromMachine(machine, asset);
+                    var deletedDoc = await _assetService.RemoveAssetFromMachine(machine, asset);
                     if (deletedDoc != null)
                         return Ok(deletedDoc);
                     else
@@ -89,7 +87,7 @@ namespace MachineAPI.Controllers
         {
             try
             {
-                var docs = _machineAndAssetService.GetLatestMachine();
+                var docs = _assetService.GetLatestMachine();
                 if (docs !=null)
                     return Ok(docs);
                 return

@@ -5,14 +5,6 @@ namespace MachineAPI.Models
     [BsonIgnoreExtraElements]
     public class MapBsonToMachineModel
     {
-        private AssetModel _asset = new();
-
-        public MapBsonToMachineModel()
-        {
-            _asset.AssetName = AssetName;
-            _asset.SeriesNo = SeriesNo;
-        }
-
         [BsonElement("MachineName")]
         public string MachineName { get; set; }
 
@@ -23,3 +15,4 @@ namespace MachineAPI.Models
         public string SeriesNo { get; set; }
     }
 }
+

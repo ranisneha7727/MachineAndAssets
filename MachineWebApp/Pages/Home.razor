@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using MachineAPI;
 @using MachineAPI.Entities;
+@using MachineAPI.Models;
 @using System.Collections;
 @using System.Data;
 @using System.Collections.Generic;
@@ -8,7 +9,7 @@
 @using System.Text.Json;
 @using System.ComponentModel;
 @using Newtonsoft.Json;
-
+@inject MachineAPI.Services.AssetsServiceMongo AssetService
 <PageTitle>Home</PageTitle>
 <h1>Search</h1>
 <br />
@@ -23,74 +24,68 @@
 </div>
 <br />
 
-@if (this.outTable.Rows.Count > 0 && outTable != null)
+@if (machines == null)
 {
-    <table class="table" width:auto>
-        <thead>
-            <tr>
-                <th style='width:15%'>Machine Name</th>
-                <th style='width:50%'>Asset Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (DataRow row in outTable.Rows)
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <thead>
+        <tr>
+            <th style='width:15%'>Machine Name</th>
+            <th style='width:50%'>Asset Name</th>
+            <th style='width:20%'>Series No</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var machine in machines)
+        {
+            @foreach (var asset in machine.Assets)
             {
                 <tr>
-                    <td style='width:15%'>@row["MachineName"]</td>
-                    <td style='width:50%'>@row["AssetName"]</td>
+                    <td style='width:15%'>@machine.MachineName</td>
+                    <td style='width:40%'>@asset.Name</td>
+                    <td style='width:10%'>@asset.SeriesNo</td>
                 </tr>
             }
-        </tbody>
-    </table>
+        }
+    </tbody>
 }
 
 @code {
     private string? strSearchVal;
-    public DataTable outTable = new DataTable();
+    private IEnumerable<MachineModel?> machines;
 
     private async Task? SearchAsset()
     {
-        HttpClient httpClient = new HttpClient();
-        outTable.Clear();
         try
         {
+            machines = null;
             if (!string.IsNullOrEmpty(strSearchVal))
             {
-                var OutDetails = await httpClient.GetStringAsync("https://localhost:8080/api/v1/machines?search=" + strSearchVal);
-                outTable = (DataTable)JsonConvert.DeserializeObject(OutDetails, (typeof(DataTable)));
+                machines = AssetService.Search(strSearchVal);
             }
             else
             {
-                var OutDetails = await httpClient.GetStringAsync("https://localhost:8080/api/v1/machines");
-                outTable = (DataTable)JsonConvert.DeserializeObject(OutDetails, (typeof(DataTable)));
+                machines = AssetService.SearchAll();
             }
         }
         catch (Exception ex)
         {
-            //return null;
-        }
-        finally
-        {
-            httpClient.Dispose();
+
         }
     }
 
     private async Task? ShowLatestMachine()
     {
-        HttpClient httpClient = new HttpClient();
-        outTable.Clear();
         try
         {
-            var outPutLatestSeries = await httpClient.GetStringAsync("https://localhost:8080/api/v1/machines/latest");
-            outTable = (DataTable)JsonConvert.DeserializeObject(outPutLatestSeries, (typeof(DataTable)));
+            machines = null;
+            machines = AssetService.GetLatestMachine();
         }
         catch (Exception ex)
         {
-           // return null;
-        }
-        finally
-        {
-            httpClient.Dispose();
+           
         }
     }
 }

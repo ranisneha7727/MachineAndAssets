@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton<IMachinetService, MachineServiceMongo>();
+builder.Services.AddSingleton<IAssetsService, AssetsServiceMongo>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);

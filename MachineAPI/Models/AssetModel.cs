@@ -6,7 +6,8 @@ namespace MachineAPI.Models
     public class AssetModel
     {
         [MaxLength(40)]
-        public string AssetName { get; set; }
+        [BsonElement("AssetName")]
+        public string Name { get; set; }
 
         [BsonElement("SeriesNo")]
         [MaxLength(10)]
